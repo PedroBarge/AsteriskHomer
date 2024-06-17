@@ -196,9 +196,4 @@ services:
     logging:
       options:
         max-size: "50m"
-    networks:
-      - asterisk-net
-
-networks:
-  asterisk-net:
 
