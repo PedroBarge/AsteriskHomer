@@ -4,6 +4,10 @@ volumes:
     grafana_data: {}
     clickhouse_data: {}
 
+networks:
+  homer_network:
+    external: true
+
 services:
   grafana:
     image: grafana/grafana-oss:10.4.3
@@ -30,6 +34,9 @@ services:
     logging:
       options:
         max-size: "10m"
+    networks:
+      - homer_network
+  
 
   clickhouse-server:
     image: clickhouse/clickhouse-server:23.3-alpine
@@ -52,6 +59,9 @@ services:
     logging:
       options:
         max-size: "10m"
+    networks:
+      - homer_network
+  
 
   qryn:
     image: qxip/qryn:latest
@@ -73,6 +83,9 @@ services:
     logging:
       options:
         max-size: "10m"
+    networks:
+      - homer_network
+  
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -92,6 +105,9 @@ services:
     logging:
       options:
         max-size: "10m"
+    networks:
+      - homer_network
+  
   
   vector:
     image: timberio/vector:0.31.0-alpine
@@ -104,6 +120,9 @@ services:
     logging:
       options:
         max-size: "10m"
+    networks:
+      - homer_network
+  
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -117,6 +136,9 @@ services:
     logging:
       options:
         max-size: "10m"
+    networks:
+      - homer_network
+  
 
   alertman:
     image: prom/alertmanager:latest
@@ -131,6 +153,9 @@ services:
     logging:
       options:
         max-size: "10m"
+    networks:
+      - homer_network
+  
 
   hepgen:
     image: qxip/docker-hepgen
@@ -144,6 +169,9 @@ services:
     depends_on:
       - qryn
       - clickhouse-server
+    networks:
+      - homer_network
+  
 
   hepgen-bad:
     image: qxip/docker-hepgen
@@ -159,6 +187,9 @@ services:
     depends_on:
       - qryn
       - clickhouse-server
+    networks:
+      - homer_network
+  
 
   heplify-server:
     image: ghcr.io/sipcapture/heplify-server:latest
@@ -183,6 +214,9 @@ services:
       - "HEPLIFYSERVER_LOKIURL=http://qryn:3100/loki/api/v1/push"
       - "HEPLIFYSERVER_LOKITIMER=1"
       - "HEPLIFYSERVER_LOKIIPPORTLABELS=true"
+      - "HOMER_USER=homer"
+      - "HOMER_PASSWORD=homer"
+      - "HEPLIFYSERVER_CAPTURE_ADDRESS=192.168.3.163"
     restart: unless-stopped
     depends_on:
       - qryn
@@ -196,4 +230,6 @@ services:
     logging:
       options:
         max-size: "50m"
-
+    networks:
+      - homer_network
+  
