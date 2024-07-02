@@ -14,3 +14,5 @@ socket.on("hep", (data) => {
 socket.on("disconnect", () => {
   console.log("Desconectado do servidor WebSocket");
 });
+
+// OBS: feito com React noutro repositório

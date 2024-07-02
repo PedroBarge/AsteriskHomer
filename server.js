@@ -2,30 +2,37 @@ const dgram = require('dgram');
 const http = require('http');
 const socketIo = require('socket.io');
 
-// Criar servidor HTTP para WebSocket
 const app = http.createServer();
 const io = socketIo(app);
 
 const udpServer = dgram.createSocket('udp4');
 
-const UDP_PORT = 9060;  // Porta configurada no hep.conf do Asterisk 
-const UDP_HOST = '127.0.0.1';  // Endereço IP 
+const UDP_PORT = 9060; 
+const UDP_HOST = '127.0.0.1'; 
 
-const WS_PORT = 3000;   // Porta do WebSocket (para o cliente conectar-se)
+const WS_PORT = 3000;  
 
 function decodeHEPMessage(message) {
     const data = message.toString('utf8');
-    return data;
+
+    // Tenta identificar e extrair a mensagem SIP dentro dos dados HEP
+    const sipStartIndex = data.indexOf('SIP/2.0');
+    if (sipStartIndex !== -1) {
+        const sipMessage = data.slice(sipStartIndex);
+        return { sipMessage };
+    }
+
+    // Se a mensagem SIP não for encontrada, retorne os dados crus
+    return { rawData: data };    
 }
 
 udpServer.on('message', (message, remote) => {
     const hepData = decodeHEPMessage(message);
     console.log(`Pacote HEP recebido de ${remote.address}:${remote.port}`);
-    //console.log(`Dados: ${hepData}`);
+    console.log('Dados HEP:', hepData);
 
     // Enviar dados para o cliente
     io.emit('hep', hepData);
-
 });
 
 udpServer.on('listening', () => {
